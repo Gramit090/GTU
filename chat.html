@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Chat - GTU Students</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <script src="theme.js"></script>
+    <script src="i18n.js"></script>
+    <script src="auth.js"></script>
+    <style>
+        .chat-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-lg);
+            height: calc(100vh - 120px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            text-align: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--spacing-md);
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-md);
+            box-shadow: var(--shadow-md);
+        }
+
+        .message {
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--radius-lg);
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-sm);
+            transition: all 0.2s ease;
+        }
+
+        .message-text {
+            flex: 1;
+            word-break: break-word;
+            line-height: 1.4;
+        }
+
+        .message-actions {
+            display: none;
+            gap: 0.5rem;
+            opacity: 0;
+            transform: translateX(-5px);
+            transition: all 0.2s ease;
+        }
+
+        .message:hover .message-actions {
+            display: flex;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .edit-button, .delete-button {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.4rem;
+            border-radius: var(--radius-full);
+            transition: all 0.2s ease;
+            opacity: 0.7;
+            min-width: 32px;
+            min-height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .edit-button:hover {
+            color: var(--primary);
+            opacity: 1;
+            background: var(--surface);
+            transform: translateY(-1px);
+        }
+
+        .delete-button:hover {
+            color: var(--error);
+            opacity: 1;
+            background: var(--surface);
+            transform: translateY(-1px);
+        }
+
+        .edit-button:active, .delete-button:active {
+            transform: scale(0.95);
+        }
+
+        .edit-input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 2px solid var(--primary);
+            border-radius: var(--radius-md);
+            background: var(--background);
+            color: var(--text-primary);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .edit-input:focus {
+            outline: none;
+            border-color: var(--primary-dark);
+            box-shadow: var(--shadow-md);
+        }
+
+        .edit-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            opacity: 0;
+            transform: translateY(-5px);
+            animation: fadeInUp 0.2s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .edit-save, .edit-cancel {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            min-width: 80px;
+            justify-content: center;
+        }
+
+        .edit-save {
+            background: var(--primary);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .edit-cancel {
+            background: var(--surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .edit-save:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .edit-cancel:hover {
+            background: var(--background);
+            transform: translateY(-1px);
+        }
+
+        .edit-save:active, .edit-cancel:active {
+            transform: scale(0.98);
+        }
+
+        .edited-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-left: 0.5rem;
+            font-style: italic;
+            opacity: 0.8;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .edited-label i {
+            font-size: 0.7rem;
+        }
+
+        .message.sent .message-content {
+            background: var(--primary);
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+
+        .message.received .message-content {
+            background: var(--background);
+            color: var(--text-primary);
+            align-self: flex-start;
+        }
+
+        .message-sender {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .message-time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: var(--spacing-xs);
+        }
+
+        .message-photo {
+            max-width: 300px;
+            border-radius: var(--radius-md);
+            margin-top: var(--spacing-xs);
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: var(--spacing-sm);
+            background: var(--surface);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-full);
+            background: var(--background);
+            color: var(--text-primary);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .chat-upload-btn, .chat-voice-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            padding: var(--spacing-sm);
+            border-radius: var(--radius-full);
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .chat-upload-btn:hover, .chat-voice-btn:hover {
+            background: var(--background);
+            transform: translateY(-1px);
+        }
+
+        .chat-upload-btn:active, .chat-voice-btn:active {
+            transform: scale(0.95);
+        }
+
+        .chat-voice-btn.recording {
+            color: var(--error);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(var(--error-rgb), 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(var(--error-rgb), 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(var(--error-rgb), 0);
+            }
+        }
+
+        .recording-status {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--surface);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+            box-shadow: var(--shadow-md);
+            display: none;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .recording-status.show {
+            display: flex;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .recording-status .recording-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--error);
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, 10px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+
+        .audio-message {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .audio-message audio {
+            flex: 1;
+            height: 36px;
+        }
+
+        .audio-message .audio-duration {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                padding: var(--spacing-md);
+                height: calc(100vh - 100px);
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+
+            .message-photo {
+                max-width: 200px;
+            }
+
+            .chat-input-container {
+                padding: var(--spacing-sm);
+            }
+
+            .chat-send-btn {
+                padding: var(--spacing-sm) var(--spacing-md);
+            }
+
+            .message-actions {
+                gap: 0.25rem;
+            }
+
+            .edit-button, .delete-button {
+                padding: 0.35rem;
+                min-width: 28px;
+                min-height: 28px;
+            }
+
+            .edit-input {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.9rem;
+            }
+
+            .edit-save, .edit-cancel {
+                padding: 0.35rem 0.6rem;
+                font-size: 0.8rem;
+                min-width: 70px;
+            }
+
+            .file-preview {
+                max-width: 200px;
+            }
+
+            .audio-message {
+                max-width: 200px;
+            }
+
+            .recording-status {
+                font-size: 0.8rem;
+                padding: var(--spacing-xs) var(--spacing-sm);
+            }
+        }
+
+        /* Prevent text selection on mobile */
+        .message, .chat-input, .chat-send-btn, .chat-upload-btn, .chat-voice-btn {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Improve touch feedback */
+        .chat-send-btn:active, .chat-upload-btn:active, .chat-voice-btn:active {
+            transform: scale(0.98);
+        }
+
+        .user-info {
+            position: fixed;
+            top: var(--spacing-md);
+            right: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            z-index: 1000;
+        }
+
+        .user-welcome {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .logout-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--surface);
+            border: none;
+            border-radius: var(--radius-full);
+            color: var(--text-primary);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .logout-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .logout-button:active {
+            transform: scale(0.98);
+        }
+
+        .logout-button i {
+            font-size: 1rem;
+            color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .user-info {
+                top: var(--spacing-sm);
+                right: var(--spacing-sm);
+                gap: var(--spacing-sm);
+            }
+
+            .user-welcome {
+                display: none;
+            }
+
+            .logout-button {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="switchers-container">
+        <button class="theme-switcher" onclick="theme.toggleTheme()">
+            <i class="fas fa-moon"></i>
+            <span>Dark</span>
+        </button>
+        <div class="language-switcher"></div>
+    </div>
+
+    <div class="user-info">
+        <span class="user-welcome" data-i18n="chat.welcome">Welcome,</span>
+        <button class="logout-button" onclick="auth.logout()">
+            <i class="fas fa-sign-out-alt"></i>
+            <span data-i18n="chat.logout">Logout</span>
+        </button>
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1 class="title" data-i18n="chat.title">GTU Chat</h1>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <!-- Messages will be inserted here -->
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <span data-i18n="chat.typing">is typing...</span>
+        </div>
+
+        <div class="chat-input-container">
+            <input type="text" class="chat-input" id="messageInput" data-i18n-placeholder="chat.placeholder" placeholder="Type your message...">
+            <button class="chat-voice-btn" id="voiceBtn" title="Record voice message">
+                <i class="fas fa-microphone"></i>
+            </button>
+            <button class="chat-upload-btn" id="uploadBtn">
+                <i class="fas fa-image"></i>
+            </button>
+            <button class="chat-send-btn" id="sendBtn" data-i18n="chat.send">Send</button>
+        </div>
+    </div>
+
+    <div class="recording-status" id="recordingStatus">
+        <div class="recording-dot"></div>
+        <span id="recordingTime">Recording... 00:00</span>
+    </div>
+
+    <input type="file" id="fileInput" accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.zip" style="display: none">
+
+    <script>
+        // Chat functionality
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const fileInput = document.getElementById('fileInput');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        let messages = JSON.parse(localStorage.getItem('chatMessages') || '[]');
+        const currentUser = localStorage.getItem('currentUser');
+
+        function formatTime(date) {
+            return new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function addMessage(message, isPhoto = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${message.sender === currentUser ? 'sent' : 'received'}`;
+            messageDiv.dataset.messageId = message.id;
+            
+            const senderDiv = document.createElement('div');
+            senderDiv.className = 'message-sender';
+            senderDiv.textContent = message.sender;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            const textDiv = document.createElement('div');
+            textDiv.className = 'message-text';
+            
+            if (isPhoto) {
+                const img = document.createElement('img');
+                img.src = message.content;
+                img.className = 'message-photo';
+                textDiv.appendChild(img);
+            } else {
+                textDiv.textContent = message.content;
+                if (message.edited) {
+                    const editedLabel = document.createElement('span');
+                    editedLabel.className = 'edited-label';
+                    editedLabel.innerHTML = '<i class="fas fa-pencil-alt"></i> edited';
+                    textDiv.appendChild(editedLabel);
+                }
+            }
+            
+            contentDiv.appendChild(textDiv);
+
+            // Add action buttons for user's own messages
+            if (message.sender === currentUser && !isPhoto) {
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'message-actions';
+
+                const editBtn = document.createElement('button');
+                editBtn.className = 'edit-button';
+                editBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+                editBtn.title = 'Edit message';
+                editBtn.onclick = () => startEditing(message.id, message.content);
+                actionsDiv.appendChild(editBtn);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-button';
+                deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteBtn.title = 'Delete message';
+                deleteBtn.onclick = () => deleteMessage(message.id);
+                actionsDiv.appendChild(deleteBtn);
+
+                contentDiv.appendChild(actionsDiv);
+            }
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            timeDiv.textContent = formatTime(message.timestamp);
+            
+            messageDiv.appendChild(senderDiv);
+            messageDiv.appendChild(contentDiv);
+            messageDiv.appendChild(timeDiv);
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function deleteMessage(messageId) {
+            if (!confirm('Are you sure you want to delete this message?')) {
+                return;
+            }
+
+            try {
+                // Remove message from array
+                messages = messages.filter(msg => msg.id !== messageId);
+                
+                // Update localStorage
+                localStorage.setItem('chatMessages', JSON.stringify(messages));
+                
+                // Remove message from DOM
+                const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+                if (messageElement) {
+                    messageElement.remove();
+                }
+            } catch (error) {
+                console.error('Error deleting message:', error);
+                alert('Failed to delete message. Please try again.');
+            }
+        }
+
+        function loadMessages() {
+            chatMessages.innerHTML = '';
+            messages.forEach(message => {
+                addMessage(message, message.isPhoto);
+            });
+        }
+
+        function sendMessage(content, isPhoto = false) {
+            if (!content) return;
+
+            const message = {
+                id: Date.now().toString(), // Add unique ID for each message
+                sender: currentUser,
+                content: content,
+                timestamp: new Date().toISOString(),
+                isPhoto: isPhoto
+            };
+
+            messages.push(message);
+            localStorage.setItem('chatMessages', JSON.stringify(messages));
+            addMessage(message, isPhoto);
+            messageInput.value = '';
+        }
+
+        function startEditing(messageId, currentContent) {
+            const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+            const contentDiv = messageElement.querySelector('.message-content');
+            const textDiv = contentDiv.querySelector('.message-text');
+            const actionsDiv = contentDiv.querySelector('.message-actions');
+
+            // Create edit input
+            const editInput = document.createElement('input');
+            editInput.type = 'text';
+            editInput.className = 'edit-input';
+            editInput.value = currentContent;
+            editInput.focus();
+            editInput.select();
+
+            // Create action buttons
+            const editActions = document.createElement('div');
+            editActions.className = 'edit-actions';
+
+            const saveBtn = document.createElement('button');
+            saveBtn.className = 'edit-save';
+            saveBtn.innerHTML = '<i class="fas fa-check"></i> Save';
+            saveBtn.onclick = () => saveEdit(messageId, editInput.value);
+
+            const cancelBtn = document.createElement('button');
+            cancelBtn.className = 'edit-cancel';
+            cancelBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
+            cancelBtn.onclick = () => cancelEdit(messageId, currentContent);
+
+            editActions.appendChild(saveBtn);
+            editActions.appendChild(cancelBtn);
+
+            // Replace content with edit form
+            textDiv.innerHTML = '';
+            textDiv.appendChild(editInput);
+            textDiv.appendChild(editActions);
+            actionsDiv.style.display = 'none';
+
+            // Handle Enter key
+            editInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    saveEdit(messageId, editInput.value);
+                }
+            });
+
+            // Handle Escape key
+            editInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    cancelEdit(messageId, currentContent);
+                }
+            });
+        }
+
+        function saveEdit(messageId, newContent) {
+            if (!newContent.trim()) {
+                alert('Message cannot be empty');
+                return;
+            }
+
+            try {
+                // Update message in array
+                const messageIndex = messages.findIndex(msg => msg.id === messageId);
+                if (messageIndex !== -1) {
+                    messages[messageIndex].content = newContent;
+                    messages[messageIndex].edited = true;
+                    
+                    // Update localStorage
+                    localStorage.setItem('chatMessages', JSON.stringify(messages));
+                    
+                    // Reload messages to show updated content
+                    loadMessages();
+                }
+            } catch (error) {
+                console.error('Error editing message:', error);
+                alert('Failed to edit message. Please try again.');
+            }
+        }
+
+        function cancelEdit(messageId, originalContent) {
+            const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+            const contentDiv = messageElement.querySelector('.message-content');
+            const textDiv = contentDiv.querySelector('.message-text');
+            const actionsDiv = contentDiv.querySelector('.message-actions');
+
+            // Restore original content
+            textDiv.textContent = originalContent;
+            actionsDiv.style.display = 'flex';
+        }
+
+        // Event listeners
+        sendBtn.addEventListener('click', () => {
+            sendMessage(messageInput.value);
+        });
+
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage(messageInput.value);
+            }
+        });
+
+        uploadBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // File upload configuration
+        const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+        const SUPPORTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif'];
+        const SUPPORTED_VIDEO_TYPES = ['video/mp4', 'video/webm'];
+        const SUPPORTED_DOCUMENT_TYPES = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/zip'
+        ];
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function getFileIcon(type) {
+            if (type.startsWith('image/')) return 'fa-image';
+            if (type.startsWith('video/')) return 'fa-video';
+            if (type === 'application/pdf') return 'fa-file-pdf';
+            if (type.includes('word')) return 'fa-file-word';
+            if (type.includes('excel') || type.includes('sheet')) return 'fa-file-excel';
+            if (type === 'application/zip') return 'fa-file-archive';
+            return 'fa-file';
+        }
+
+        function createFilePreview(file) {
+            const preview = document.createElement('div');
+            preview.className = 'file-preview';
+
+            if (file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                preview.appendChild(img);
+            } else if (file.type.startsWith('video/')) {
+                const video = document.createElement('video');
+                video.src = URL.createObjectURL(file);
+                video.controls = true;
+                preview.appendChild(video);
+            }
+
+            const fileInfo = document.createElement('div');
+            fileInfo.className = 'file-info';
+
+            const fileIcon = document.createElement('i');
+            fileIcon.className = `fas ${getFileIcon(file.type)} file-icon`;
+
+            const fileDetails = document.createElement('div');
+            fileDetails.className = 'file-details';
+
+            const fileName = document.createElement('div');
+            fileName.className = 'file-name';
+            fileName.textContent = file.name;
+
+            const fileSize = document.createElement('div');
+            fileSize.className = 'file-size';
+            fileSize.textContent = formatFileSize(file.size);
+
+            fileDetails.appendChild(fileName);
+            fileDetails.appendChild(fileSize);
+
+            const downloadBtn = document.createElement('i');
+            downloadBtn.className = 'fas fa-download file-download';
+            downloadBtn.title = 'Download file';
+            downloadBtn.onclick = () => {
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(file);
+                link.download = file.name;
+                link.click();
+            };
+
+            fileInfo.appendChild(fileIcon);
+            fileInfo.appendChild(fileDetails);
+            fileInfo.appendChild(downloadBtn);
+            preview.appendChild(fileInfo);
+
+            return preview;
+        }
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+            
+            const chatContainer = document.querySelector('.chat-container');
+            chatContainer.insertBefore(errorDiv, chatContainer.firstChild);
+            
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        function validateFile(file) {
+            if (file.size > MAX_FILE_SIZE) {
+                showError(`File size exceeds ${formatFileSize(MAX_FILE_SIZE)} limit`);
+                return false;
+            }
+
+            const supportedTypes = [
+                ...SUPPORTED_IMAGE_TYPES,
+                ...SUPPORTED_VIDEO_TYPES,
+                ...SUPPORTED_DOCUMENT_TYPES
+            ];
+
+            if (!supportedTypes.includes(file.type)) {
+                showError('Unsupported file type');
+                return false;
+            }
+
+            return true;
+        }
+
+        function handleFileUpload(file) {
+            if (!validateFile(file)) return;
+
+            // In a real application, you would upload the file to a server here
+            // For now, we'll simulate the upload with a progress bar
+            const message = {
+                id: Date.now().toString(),
+                sender: currentUser,
+                content: URL.createObjectURL(file),
+                timestamp: new Date().toISOString(),
+                isFile: true,
+                fileName: file.name,
+                fileSize: file.size,
+                fileType: file.type
+            };
+
+            messages.push(message);
+            localStorage.setItem('chatMessages', JSON.stringify(messages));
+            addMessage(message, true);
+        }
+
+        function addMessage(message, isFile = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${message.sender === currentUser ? 'sent' : 'received'}`;
+            messageDiv.dataset.messageId = message.id;
+            
+            const senderDiv = document.createElement('div');
+            senderDiv.className = 'message-sender';
+            senderDiv.textContent = message.sender;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            const textDiv = document.createElement('div');
+            textDiv.className = 'message-text';
+            
+            if (isFile) {
+                const filePreview = document.createElement('div');
+                filePreview.className = 'file-preview';
+
+                if (message.fileType.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.src = message.content;
+                    filePreview.appendChild(img);
+                } else if (message.fileType.startsWith('video/')) {
+                    const video = document.createElement('video');
+                    video.src = message.content;
+                    video.controls = true;
+                    filePreview.appendChild(video);
+                }
+
+                const fileInfo = document.createElement('div');
+                fileInfo.className = 'file-info';
+
+                const fileIcon = document.createElement('i');
+                fileIcon.className = `fas ${getFileIcon(message.fileType)} file-icon`;
+
+                const fileDetails = document.createElement('div');
+                fileDetails.className = 'file-details';
+
+                const fileName = document.createElement('div');
+                fileName.className = 'file-name';
+                fileName.textContent = message.fileName;
+
+                const fileSize = document.createElement('div');
+                fileSize.className = 'file-size';
+                fileSize.textContent = formatFileSize(message.fileSize);
+
+                fileDetails.appendChild(fileName);
+                fileDetails.appendChild(fileSize);
+
+                const downloadBtn = document.createElement('i');
+                downloadBtn.className = 'fas fa-download file-download';
+                downloadBtn.title = 'Download file';
+                downloadBtn.onclick = () => {
+                    const link = document.createElement('a');
+                    link.href = message.content;
+                    link.download = message.fileName;
+                    link.click();
+                };
+
+                fileInfo.appendChild(fileIcon);
+                fileInfo.appendChild(fileDetails);
+                fileInfo.appendChild(downloadBtn);
+                filePreview.appendChild(fileInfo);
+
+                textDiv.appendChild(filePreview);
+            } else {
+                textDiv.textContent = message.content;
+                if (message.edited) {
+                    const editedLabel = document.createElement('span');
+                    editedLabel.className = 'edited-label';
+                    editedLabel.innerHTML = '<i class="fas fa-pencil-alt"></i> edited';
+                    textDiv.appendChild(editedLabel);
+                }
+            }
+            
+            contentDiv.appendChild(textDiv);
+
+            // Add action buttons for user's own messages
+            if (message.sender === currentUser && !isFile) {
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'message-actions';
+
+                const editBtn = document.createElement('button');
+                editBtn.className = 'edit-button';
+                editBtn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+                editBtn.title = 'Edit message';
+                editBtn.onclick = () => startEditing(message.id, message.content);
+                actionsDiv.appendChild(editBtn);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-button';
+                deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                deleteBtn.title = 'Delete message';
+                deleteBtn.onclick = () => deleteMessage(message.id);
+                actionsDiv.appendChild(deleteBtn);
+
+                contentDiv.appendChild(actionsDiv);
+            }
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            timeDiv.textContent = formatTime(message.timestamp);
+            
+            messageDiv.appendChild(senderDiv);
+            messageDiv.appendChild(contentDiv);
+            messageDiv.appendChild(timeDiv);
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Update file input event listener
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                handleFileUpload(file);
+            }
+            // Reset the input
+            e.target.value = '';
+        });
+
+        // Initialize chat
+        document.addEventListener('DOMContentLoaded', () => {
+            i18n.init();
+            theme.init();
+            loadMessages();
+
+            // Update welcome message with current user
+            const userWelcome = document.querySelector('.user-welcome');
+            if (userWelcome) {
+                const currentUser = auth.getCurrentUser();
+                userWelcome.textContent = `${i18n.translations[i18n.currentLang]['chat.welcome']} ${currentUser}`;
+            }
+        });
+
+        // Voice message configuration
+        const MAX_RECORDING_TIME = 60; // 1 minute in seconds
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let recordingTimer = null;
+        let recordingStartTime = null;
+
+        const voiceBtn = document.getElementById('voiceBtn');
+        const recordingStatus = document.getElementById('recordingStatus');
+        const recordingTime = document.getElementById('recordingTime');
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateRecordingTime() {
+            const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+            const remaining = MAX_RECORDING_TIME - elapsed;
+            
+            if (remaining <= 0) {
+                stopRecording();
+                return;
+            }
+
+            recordingTime.textContent = `Recording... ${formatTime(remaining)}`;
+        }
+
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/ogg; codecs=opus' });
+                    handleVoiceMessage(audioBlob);
+                    
+                    // Stop all tracks
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                mediaRecorder.start();
+                voiceBtn.classList.add('recording');
+                recordingStatus.classList.add('show');
+                recordingStartTime = Date.now();
+                recordingTimer = setInterval(updateRecordingTime, 1000);
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+                showError('Microphone access denied. Please check your permissions.');
+            }
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                voiceBtn.classList.remove('recording');
+                recordingStatus.classList.remove('show');
+                clearInterval(recordingTimer);
+            }
+        }
+
+        function handleVoiceMessage(audioBlob) {
+            const message = {
+                id: Date.now().toString(),
+                sender: currentUser,
+                content: URL.createObjectURL(audioBlob),
+                timestamp: new Date().toISOString(),
+                isVoiceMessage: true,
+                duration: Math.floor((Date.now() - recordingStartTime) / 1000)
+            };
+
+            messages.push(message);
+            localStorage.setItem('chatMessages', JSON.stringify(messages));
+            addMessage(message, false, true);
+        }
+
+        voiceBtn.addEventListener('mousedown', startRecording);
+        voiceBtn.addEventListener('touchstart', startRecording);
+        voiceBtn.addEventListener('mouseup', stopRecording);
+        voiceBtn.addEventListener('touchend', stopRecording);
+        voiceBtn.addEventListener('mouseleave', stopRecording);
+
+        // Update addMessage function to handle voice messages
+        function addMessage(message, isFile = false, isVoiceMessage = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${message.sender === currentUser ? 'sent' : 'received'}`;
+            messageDiv.dataset.messageId = message.id;
+            
+            const senderDiv = document.createElement('div');
+            senderDiv.className = 'message-sender';
+            senderDiv.textContent = message.sender;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            const textDiv = document.createElement('div');
+            textDiv.className = 'message-text';
+            
+            if (isVoiceMessage) {
+                const audioMessage = document.createElement('div');
+                audioMessage.className = 'audio-message';
+
+                const audio = document.createElement('audio');
+                audio.controls = true;
+                audio.src = message.content;
+
+                const duration = document.createElement('span');
+                duration.className = 'audio-duration';
+                duration.textContent = formatTime(message.duration);
+
+                audioMessage.appendChild(audio);
+                audioMessage.appendChild(duration);
+                textDiv.appendChild(audioMessage);
+            } else if (isFile) {
+                // ... existing file preview code ...
+            } else {
+                textDiv.textContent = message.content;
+                if (message.edited) {
+                    const editedLabel = document.createElement('span');
+                    editedLabel.className = 'edited-label';
+                    editedLabel.innerHTML = '<i class="fas fa-pencil-alt"></i> edited';
+                    textDiv.appendChild(editedLabel);
+                }
+            }
+            
+            contentDiv.appendChild(textDiv);
+
+            // Add action buttons for user's own messages
+            if (message.sender === currentUser && !isFile && !isVoiceMessage) {
+                // ... existing action buttons code ...
+            }
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            timeDiv.textContent = formatTime(message.timestamp);
+            
+            messageDiv.appendChild(senderDiv);
+            messageDiv.appendChild(contentDiv);
+            messageDiv.appendChild(timeDiv);
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    </script>
+</body>
+</html> 

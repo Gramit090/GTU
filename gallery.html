@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gallery - GTU Students</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <script src="theme.js"></script>
+    <script src="i18n.js"></script>
+    <script src="auth.js"></script>
+    <style>
+        .gallery-header {
+            text-align: center;
+            margin-bottom: var(--spacing-lg);
+            padding: 0 var(--spacing-sm);
+        }
+
+        .search-container {
+            max-width: 500px;
+            margin: 0 auto var(--spacing-lg);
+            position: relative;
+            padding: 0 var(--spacing-sm);
+        }
+
+        .search-input {
+            width: 100%;
+            height: 48px;
+            padding-left: 3rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-full);
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--spacing-md);
+            padding: 0 var(--spacing-sm);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .student-card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .student-image {
+            width: 100%;
+            height: 70%;
+            object-fit: cover;
+        }
+
+        .student-info {
+            padding: var(--spacing-md);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .student-name {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .like-section {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            margin-top: auto;
+        }
+
+        .like-button {
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--like);
+            font-size: 1.2rem;
+            padding: 0.5rem;
+            transition: all 0.2s ease;
+            border-radius: var(--radius-full);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .like-button:hover {
+            transform: scale(1.1);
+            background: rgba(244, 63, 94, 0.1);
+        }
+
+        .like-button.owner {
+            cursor: pointer;
+        }
+
+        .like-button.not-owner {
+            cursor: default;
+            opacity: 0.5;
+        }
+
+        .like-count {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .likers-list {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: var(--spacing-xs);
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            max-height: 0;
+            overflow: hidden;
+        }
+
+        .likers-list.show {
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 100px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: var(--spacing-xl);
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            display: none;
+        }
+
+        .no-results.show {
+            display: block;
+        }
+
+        .no-results p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .home-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-full);
+            background: var(--surface);
+            box-shadow: var(--shadow-md);
+            transition: all 0.2s ease;
+        }
+
+        .home-link:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .home-link i {
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .gallery-header {
+                margin-top: 80px;
+                margin-bottom: var(--spacing-md);
+            }
+
+            .search-container {
+                margin-bottom: var(--spacing-md);
+            }
+
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: var(--spacing-sm);
+                padding: 0 var(--spacing-sm);
+            }
+
+            .student-card {
+                aspect-ratio: 3/4;
+            }
+
+            .student-info {
+                padding: var(--spacing-sm);
+            }
+
+            .student-name {
+                font-size: 0.9rem;
+                margin-bottom: var(--spacing-xs);
+            }
+
+            .like-button {
+                min-width: 36px;
+                min-height: 36px;
+                font-size: 1rem;
+            }
+
+            .user-info {
+                top: var(--spacing-sm);
+                right: var(--spacing-sm);
+                gap: var(--spacing-sm);
+                padding: var(--spacing-xs);
+            }
+
+            .user-welcome {
+                display: none;
+            }
+
+            .chat-button, .logout-button {
+                min-width: 36px;
+                min-height: 36px;
+                padding: 0.4rem;
+            }
+
+            .chat-button span, .logout-button span {
+                display: none;
+            }
+
+            .switchers-container {
+                top: var(--spacing-sm);
+                left: var(--spacing-sm);
+                gap: var(--spacing-xs);
+            }
+
+            .theme-switcher {
+                min-width: 36px;
+                min-height: 36px;
+                padding: 0.4rem;
+            }
+
+            .theme-switcher span {
+                display: none;
+            }
+
+            .language-btn {
+                min-width: 36px;
+                min-height: 36px;
+                padding: 0.4rem;
+            }
+
+            .language-btn span {
+                display: none;
+            }
+        }
+
+        /* Prevent text selection and improve touch feedback */
+        .student-card, .like-button, .chat-button, .logout-button, .theme-switcher, .language-btn {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .student-card:active {
+            transform: scale(0.98);
+        }
+
+        .like-button:active, .chat-button:active, .logout-button:active, .theme-switcher:active, .language-btn:active {
+            transform: scale(0.95);
+        }
+
+        .language-switcher {
+            position: fixed;
+            top: var(--spacing-md);
+            right: var(--spacing-md);
+            z-index: 1000;
+        }
+
+        .language-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--surface);
+            border: none;
+            border-radius: var(--radius-full);
+            color: var(--text-primary);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .language-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .language-btn:active {
+            transform: scale(0.98);
+        }
+
+        .language-btn i {
+            font-size: 1rem;
+            color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .language-switcher {
+                top: var(--spacing-sm);
+                right: var(--spacing-sm);
+            }
+
+            .language-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        .user-info {
+            position: fixed;
+            top: var(--spacing-md);
+            right: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            z-index: 1000;
+            background: var(--background);
+            padding: var(--spacing-sm);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+        }
+
+        .user-welcome {
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .logout-button {
+            min-width: 44px;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--radius-full);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .logout-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .logout-button:active {
+            transform: scale(0.98);
+        }
+
+        .logout-button i {
+            font-size: 1rem;
+            color: var(--primary);
+        }
+
+        .chat-button {
+            min-width: 44px;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--radius-full);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .chat-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            background: var(--primary-dark);
+        }
+
+        .chat-button:active {
+            transform: scale(0.98);
+        }
+
+        .chat-button i {
+            font-size: 1rem;
+        }
+
+        .switchers-container {
+            position: fixed;
+            top: var(--spacing-md);
+            left: var(--spacing-md);
+            display: flex;
+            gap: var(--spacing-sm);
+            z-index: 1000;
+        }
+
+        .theme-switcher {
+            min-width: 44px;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--surface);
+            border: none;
+            border-radius: var(--radius-full);
+            color: var(--text-primary);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @media (max-width: 768px) {
+            .user-info {
+                top: var(--spacing-sm);
+                right: var(--spacing-sm);
+                gap: var(--spacing-sm);
+            }
+
+            .user-welcome {
+                display: none;
+            }
+
+            .logout-button {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="switchers-container">
+        <button class="theme-switcher" onclick="theme.toggleTheme()">
+            <i class="fas fa-moon"></i>
+            <span>Dark</span>
+        </button>
+        <div class="language-switcher"></div>
+    </div>
+
+    <div class="user-info">
+        <span class="user-welcome" data-i18n="gallery.welcome">Welcome,</span>
+        <a href="chat.html" class="chat-button">
+            <i class="fas fa-comments"></i>
+            <span data-i18n="nav.chat">Chat</span>
+        </a>
+        <button class="logout-button" onclick="auth.logout()">
+            <i class="fas fa-sign-out-alt"></i>
+            <span data-i18n="gallery.logout">Logout</span>
+        </button>
+    </div>
+
+    <div class="container">
+        <div class="gallery-header">
+            <h1 class="title" data-i18n="hero.title">Beautiful GTU Students</h1>
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="input search-input" id="searchInput" data-i18n-placeholder="search.placeholder" placeholder="Search by nickname...">
+            </div>
+        </div>
+
+        <div id="gallery" class="gallery">
+            <!-- Student cards will be inserted here -->
+        </div>
+        <div class="no-results" id="noResults">
+            <p data-i18n="no.results">No matching students found</p>
+        </div>
+    </div>
+
+    <footer>
+        <a href="index.html" class="home-link">
+            <i class="fas fa-home"></i>
+            <span data-i18n="back.home">Back to Home</span>
+        </a>
+    </footer>
+
+    <script>
+        // Initialize systems when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize language system first
+            i18n.init();
+            
+            // Force update content after a short delay to ensure DOM is ready
+            setTimeout(() => {
+                i18n.updateContent();
+            }, 100);
+
+            // Initialize theme system
+            theme.init();
+
+            // Update welcome message with current user
+            const userWelcome = document.querySelector('.user-welcome');
+            if (userWelcome) {
+                const currentUser = auth.getCurrentUser();
+                userWelcome.textContent = `${i18n.translations[i18n.currentLang]['gallery.welcome']} ${currentUser}`;
+            }
+        });
+
+        function loadGallery(searchTerm = '') {
+            const gallery = document.getElementById('gallery');
+            const noResults = document.getElementById('noResults');
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const currentUser = localStorage.getItem('currentUser');
+            const likes = JSON.parse(localStorage.getItem('likes') || '{}');
+
+            if (users.length === 0) {
+                gallery.innerHTML = `
+                    <div class="no-results show">
+                        <p data-i18n="no.students">No students yet</p>
+                    </div>
+                `;
+                noResults.classList.remove('show');
+                return;
+            }
+
+            // Filter users based on search term
+            const filteredUsers = users.filter(user => 
+                user.nickname.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+            if (filteredUsers.length === 0) {
+                gallery.innerHTML = '';
+                noResults.classList.add('show');
+                return;
+            }
+
+            noResults.classList.remove('show');
+            gallery.innerHTML = filteredUsers.map(user => {
+                const isOwner = user.nickname === currentUser;
+                const userLikes = likes[user.nickname] || [];
+                const hasLiked = userLikes.includes(currentUser);
+                const likeCount = userLikes.length;
+                const likeText = likeCount === 1 ? 
+                    translations[i18n.currentLang]['like'] : 
+                    translations[i18n.currentLang]['likes'];
+
+                return `
+                    <div class="student-card scale-in">
+                        <img src="${user.selfie}" alt="${user.nickname}'s photo" class="student-image">
+                        <div class="student-info">
+                            <div class="student-name">${user.nickname}</div>
+                            ${isOwner ? `
+                                <div class="like-section">
+                                    <button class="like-button owner" onclick="toggleLike('${user.nickname}')">
+                                        <i class="fas fa-heart ${hasLiked ? '' : 'far'}"></i>
+                                    </button>
+                                    <span class="like-count">${likeCount} ${likeText}</span>
+                                </div>
+                                <div class="likers-list ${likeCount > 0 ? 'show' : ''}">
+                                    ${userLikes.length > 0 ? `${translations[i18n.currentLang]['liked.by']} ${userLikes.join(', ')}` : ''}
+                                </div>
+                            ` : `
+                                <div class="like-section">
+                                    <button class="like-button not-owner">
+                                        <i class="far fa-heart"></i>
+                                    </button>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Add search functionality
+        const searchInput = document.getElementById('searchInput');
+        let searchTimeout;
+
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                loadGallery(e.target.value);
+            }, 300);
+        });
+
+        function toggleLike(nickname) {
+            const currentUser = localStorage.getItem('currentUser');
+            const likes = JSON.parse(localStorage.getItem('likes') || '{}');
+            
+            if (!likes[nickname]) {
+                likes[nickname] = [];
+            }
+
+            const index = likes[nickname].indexOf(currentUser);
+            const likeButton = document.querySelector(`[onclick="toggleLike('${nickname}')"]`);
+            
+            if (index === -1) {
+                likes[nickname].push(currentUser);
+                likeButton.classList.add('like-animation');
+                setTimeout(() => likeButton.classList.remove('like-animation'), 500);
+            } else {
+                likes[nickname].splice(index, 1);
+            }
+
+            localStorage.setItem('likes', JSON.stringify(likes));
+            loadGallery();
+        }
+
+        // Load gallery when page loads
+        loadGallery();
+    </script>
+</body>
+</html> 

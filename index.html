@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GTU Students</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <script src="i18n.js"></script>
+    <script src="theme.js"></script>
+    <style>
+        .hero {
+            min-height: 100vh;
+            min-height: 100dvh; /* Dynamic viewport height for mobile */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: var(--spacing-lg) var(--spacing-md);
+            position: relative;
+            overflow: hidden;
+            background: var(--background);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%);
+            z-index: -1;
+        }
+
+        .hero-content {
+            max-width: 600px;
+            margin: 0 auto;
+            animation: fadeInUp 0.8s ease;
+            padding: 0 var(--spacing-sm);
+        }
+
+        .hero-title {
+            font-size: clamp(2rem, 8vw, 3.5rem);
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-md);
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1rem, 4vw, 1.25rem);
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-xl);
+            line-height: 1.6;
+            padding: 0 var(--spacing-sm);
+        }
+
+        .cta-button {
+            font-size: clamp(1rem, 4vw, 1.1rem);
+            padding: clamp(0.875rem, 4vw, 1rem) clamp(2rem, 8vw, 2.5rem);
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: var(--shadow-md);
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            margin: 0 0.5rem;
+        }
+
+        .cta-button.secondary {
+            background: var(--surface);
+            color: var(--text-primary);
+            border: 2px solid var(--primary);
+        }
+
+        .cta-button.secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: var(--spacing-md);
+        }
+
+        .cta-button:active {
+            transform: scale(0.98);
+            background: var(--primary-dark);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            background: var(--primary-dark);
+        }
+
+        .cta-button i {
+            font-size: 1.2rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-xl);
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 var(--spacing-sm);
+        }
+
+        .feature-card {
+            background: var(--surface);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            text-align: left;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        .feature-card:active {
+            transform: scale(0.98);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .feature-icon {
+            font-size: clamp(1.75rem, 6vw, 2rem);
+            color: var(--primary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .feature-title {
+            font-size: clamp(1.1rem, 4vw, 1.25rem);
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .feature-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            font-size: clamp(0.9rem, 3.5vw, 1rem);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Mobile-specific enhancements */
+        @media (max-width: 768px) {
+            .hero {
+                padding: var(--spacing-md) var(--spacing-sm);
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-sm);
+                margin-top: var(--spacing-lg);
+            }
+
+            .feature-card {
+                padding: var(--spacing-md);
+            }
+
+            /* Prevent text selection on mobile */
+            .cta-button, .feature-card {
+                user-select: none;
+                -webkit-user-select: none;
+            }
+
+            /* Improve touch targets */
+            .cta-button, .feature-card {
+                min-height: 44px;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            .cta-button {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+                margin: 0;
+            }
+        }
+
+        /* Prevent pull-to-refresh on mobile */
+        body {
+            overscroll-behavior-y: none;
+        }
+
+        .language-switcher {
+            position: fixed;
+            top: var(--spacing-md);
+            right: var(--spacing-md);
+            z-index: 1000;
+        }
+
+        .language-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--surface);
+            border: none;
+            border-radius: var(--radius-full);
+            color: var(--text-primary);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .language-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .language-btn:active {
+            transform: scale(0.98);
+        }
+
+        .language-btn i {
+            font-size: 1rem;
+            color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .language-switcher {
+                top: var(--spacing-sm);
+                right: var(--spacing-sm);
+            }
+
+            .language-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="switchers-container">
+        <button class="theme-switcher" onclick="theme.toggleTheme()">
+            <i class="fas fa-moon"></i>
+            <span>Dark</span>
+        </button>
+        <div class="language-switcher"></div>
+    </div>
+    
+    <div class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title" data-i18n="hero.title">GTU Students</h1>
+            <p class="hero-subtitle" data-i18n="hero.subtitle">Join our community of talented and creative GTU students. Share your selfie and connect with others!</p>
+            <div class="cta-buttons">
+                <a href="register.html" class="cta-button">
+                    <i class="fas fa-user-plus"></i>
+                    <span data-i18n="hero.register">Register Now</span>
+                </a>
+                <a href="login.html" class="cta-button secondary">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span data-i18n="hero.login">Login</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="feature-card">
+                <i class="fas fa-camera"></i>
+                <h3 data-i18n="feature.selfie.title">Share Your Selfie</h3>
+                <p data-i18n="feature.selfie.desc">Take and share your beautiful selfie with the GTU community.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-users"></i>
+                <h3 data-i18n="feature.connect.title">Connect with Others</h3>
+                <p data-i18n="feature.connect.desc">Connect with fellow GTU students and build your network.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-heart"></i>
+                <h3 data-i18n="feature.likes.title">Get Likes</h3>
+                <p data-i18n="feature.likes.desc">Share your photos and get likes from the community.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-comments"></i>
+                <h3 data-i18n="feature.chat.title">Real-time Chat</h3>
+                <p data-i18n="feature.chat.desc">Chat with fellow students, share photos, and get help in real-time.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize systems when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize language system first
+            i18n.init();
+            
+            // Force update content after a short delay to ensure DOM is ready
+            setTimeout(() => {
+                i18n.updateContent();
+            }, 100);
+
+            // Initialize theme system
+            theme.init();
+
+            // Check if user is already registered
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const currentUser = localStorage.getItem('currentUser');
+            
+            const userExists = users.some(user => 
+                user.nickname === currentUser && user.selfie
+            );
+
+            if (userExists) {
+                window.location.href = 'gallery.html';
+            }
+        });
+
+        // Prevent double-tap zoom on mobile
+        document.addEventListener('touchend', function(event) {
+            event.preventDefault();
+            event.target.click();
+        }, { passive: false });
+    </script>
+</body>
+</html> 

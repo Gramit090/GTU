@@ -1,0 +1,14 @@
+{
+  "name": "gtu-students",
+  "version": "1.0.0",
+  "description": "GTU Students Gallery with User Management",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "bot": "node bot.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "node-telegram-bot-api": "^0.64.0"
+  }
+} 

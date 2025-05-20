@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - GTU Students</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="styles.css" rel="stylesheet">
+    <script src="theme.js"></script>
+    <style>
+        .register-container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: var(--spacing-xl);
+        }
+
+        .register-card {
+            background: var(--surface);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .register-form {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .register-btn {
+            margin-top: var(--spacing-md);
+            width: 100%;
+        }
+
+        .language-switcher {
+            position: fixed;
+            top: var(--spacing-md);
+            right: var(--spacing-md);
+            z-index: 1000;
+        }
+
+        .language-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--surface);
+            border: none;
+            border-radius: var(--radius-full);
+            color: var(--text-primary);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .language-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .language-btn:active {
+            transform: scale(0.98);
+        }
+
+        .language-btn i {
+            font-size: 1rem;
+            color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .register-container {
+                padding: var(--spacing-md);
+                margin-top: var(--spacing-xl);
+            }
+
+            .register-card {
+                padding: var(--spacing-lg);
+            }
+
+            .input-group {
+                margin-bottom: var(--spacing-md);
+            }
+
+            .input {
+                height: 48px;
+                font-size: 1rem;
+                padding: 0 var(--spacing-md);
+            }
+
+            .input-group label {
+                font-size: 1rem;
+                margin-bottom: var(--spacing-xs);
+            }
+
+            .register-btn {
+                height: 48px;
+                font-size: 1rem;
+                margin-top: var(--spacing-lg);
+            }
+
+            .title {
+                font-size: 1.75rem;
+                margin-bottom: var(--spacing-lg);
+            }
+        }
+
+        /* Prevent text selection on mobile */
+        .register-btn, .input {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Improve touch feedback */
+        .register-btn:active {
+            transform: scale(0.98);
+        }
+
+        .input:focus {
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+    <div class="switchers-container">
+        <button class="theme-switcher" onclick="theme.toggleTheme()">
+            <i class="fas fa-moon"></i>
+            <span>Dark</span>
+        </button>
+        <div class="language-switcher"></div>
+    </div>
+
+    <div class="container">
+        <div class="register-container">
+            <h1 class="title" data-i18n="hero.title">Beautiful GTU Students</h1>
+            <div class="register-card scale-in">
+                <form id="registerForm" class="register-form" onsubmit="handleSubmit(event)">
+                    <div class="input-group">
+                        <label for="nickname" data-i18n="register.nickname">Nickname</label>
+                        <input type="text" id="nickname" name="nickname" class="input" required 
+                               data-i18n-placeholder="register.nickname.placeholder" 
+                               placeholder="Enter your nickname">
+                    </div>
+                    <div class="input-group">
+                        <label for="password" data-i18n="register.password">Password</label>
+                        <input type="password" id="password" name="password" class="input" required 
+                               data-i18n-placeholder="register.password.placeholder" 
+                               placeholder="Enter your password">
+                    </div>
+                    <button type="submit" class="btn btn-primary register-btn">
+                        <span data-i18n="register.button">Register</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="i18n.js"></script>
+    <script>
+        function handleSubmit(event) {
+            event.preventDefault();
+            const nickname = document.getElementById('nickname').value;
+            localStorage.setItem('currentUser', nickname);
+            window.location.href = 'selfie.html';
+        }
+
+        // Check if user is already registered
+        function checkRegistration() {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const currentUser = localStorage.getItem('currentUser');
+            
+            // Check if current user exists and has a selfie
+            const userExists = users.some(user => 
+                user.nickname === currentUser && user.selfie
+            );
+
+            if (userExists) {
+                window.location.href = 'gallery.html';
+            }
+        }
+
+        // Run check after page loads
+        document.addEventListener('DOMContentLoaded', checkRegistration);
+    </script>
+</body>
+</html> 
